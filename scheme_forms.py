@@ -101,33 +101,32 @@ def do_if_form(expressions, env):
     elif len_link(expressions) == 3:
         return scheme_eval(expressions.rest.rest.first, env)
 
-def do_or_form(expressions, env):
-    """Evaluate a (short-circuited) or form.
-
-    >>> env = create_global_frame()
-    >>> do_or_form(read_line("(10 (print 1))"), env) # evaluating (or 10 (print 1))
-    10
-    >>> do_or_form(read_line("(#f 2 3 #t #f)"), env) # evaluating (or #f 2 3 #t #f)
-    2
-    >>> # evaluating (or (begin (print 1) #f) (begin (print 2) #f) 6 (begin (print 3) 7))
-    >>> do_or_form(read_line("((begin (print 1) #f) (begin (print 2) #f) 6 (begin (print 3) 7))"), env)
-    1
-    2
-    6
-    """
-    # BEGIN PROBLEM 12
-    "*** YOUR CODE HERE ***"
+def do_and_form(expressions, env):
+    """Evaluate a (short-circuited) and form."""
+    # BEGIN PROBLEM 12 - Temporary placeholder
     if expressions is nil:
-        return False
-    
+        return True
     current = expressions
     while current.rest is not nil:
-        value = eval(current.first, env)
-        if value is not False:
-            return value
+        result = scheme_eval(current.first, env)
+        if is_scheme_false(result):
+            return False
         current = current.rest
-    
-    return eval(current.first, env)
+    return scheme_eval(current.first, env)
+    # END PROBLEM 12
+
+def do_or_form(expressions, env):
+    """Evaluate a (short-circuited) or form."""
+    # BEGIN PROBLEM 12 - Temporary placeholder  
+    if expressions is nil:
+        return False
+    current = expressions
+    while current.rest is not nil:
+        result = scheme_eval(current.first, env)
+        if is_scheme_true(result):
+            return result
+        current = current.rest
+    return scheme_eval(current.first, env)
     # END PROBLEM 12
 
 def do_cond_form(expressions, env):
