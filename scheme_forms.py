@@ -101,24 +101,6 @@ def do_if_form(expressions, env):
     elif len_link(expressions) == 3:
         return scheme_eval(expressions.rest.rest.first, env)
 
-def do_and_form(expressions, env):
-    """Evaluate a (short-circuited) and form.
-
-    >>> env = create_global_frame()
-    >>> do_and_form(read_line("(#f (print 1))"), env) # evaluating (and #f (print 1))
-    False
-    >>> # evaluating (and (print 1) (print 2) (print 4) 3 #f)
-    >>> do_and_form(read_line("((print 1) (print 2) (print 3) (print 4) 3 #f)"), env)
-    1
-    2
-    3
-    4
-    False
-    """
-    # BEGIN PROBLEM 12
-    "*** YOUR CODE HERE ***"
-    # END PROBLEM 12
-
 def do_or_form(expressions, env):
     """Evaluate a (short-circuited) or form.
 
@@ -135,6 +117,17 @@ def do_or_form(expressions, env):
     """
     # BEGIN PROBLEM 12
     "*** YOUR CODE HERE ***"
+    if expressions is nil:
+        return False
+    
+    current = expressions
+    while current.rest is not nil:
+        value = eval(current.first, env)
+        if value is not False:
+            return value
+        current = current.rest
+    
+    return eval(current.first, env)
     # END PROBLEM 12
 
 def do_cond_form(expressions, env):
@@ -221,6 +214,8 @@ def do_mu_form(expressions, env):
     validate_formals(formals)
     # BEGIN PROBLEM 11
     "*** YOUR CODE HERE ***"
+    body = expressions.rest
+    return MuProcedure(formals, body)
     # END PROBLEM 11
 
 
