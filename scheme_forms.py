@@ -13,33 +13,44 @@ from scheme_builtins import *
 # the environment in which the form is to be evaluated.
 
 def do_define_form(expressions, env):
-    """Evaluate a define form."""
-    validate_form(expressions, 2)
+    """Evaluate a define form.
+    >>> env = create_global_frame()
+    >>> do_define_form(read_line("(x 2)"), env) # evaluating (define x 2)
+    'x'
+    >>> scheme_eval("x", env)
+    2
+    >>> do_define_form(read_line("(x (+ 2 8))"), env) # evaluating (define x (+ 2 8))
+    'x'
+    >>> scheme_eval("x", env)
+    10
+    >>> # problem 10
+    >>> env = create_global_frame()
+    >>> do_define_form(read_line("((f x) (+ x 2))"), env) # evaluating (define (f x) (+ x 8))
+    'f'
+    >>> scheme_eval(read_line("(f 3)"), env)
+    5
+    """
+    validate_form(expressions, 2) # Checks that expressions is a list of length at least 2
     signature = expressions.first
-    print(f"DEBUG: expressions = {expressions}")  # Add this
-    print(f"DEBUG: signature = {signature}")      # Add this
-    print(f"DEBUG: signature type = {type(signature)}")  # Add this
-    
     if scheme_symbolp(signature):
-        validate_form(expressions, 2, 2)
+        # assigning a name to a value e.g. (define x (+ 1 2))
+        validate_form(expressions, 2, 2) # Checks that expressions is a list of length exactly 2
         # BEGIN PROBLEM 4
-        value_exp = expressions.rest.first
-        print(f"DEBUG: value_exp = {value_exp}")  # Add this
-        value = scheme_eval(value_exp, env)
-        print(f"DEBUG: about to define {signature} = {value}")  # Add this
+        "*** YOUR CODE HERE ***"
+        value = scheme_eval(expressions.rest.first, env)
         env.define(signature, value)
-        print(f"DEBUG: defined {signature} = {env.lookup(signature)}")  # Add this
         return signature
         # END PROBLEM 4
-    # ... rest of code
     elif isinstance(signature, Link) and scheme_symbolp(signature.first):
+        # defining a named procedure e.g. (define (f x y) (+ x y))
         # BEGIN PROBLEM 10
-        name = signature.first
+        "*** YOUR CODE HERE ***"
+        func_name = signature.first
         formals = signature.rest
         body = expressions.rest
-        lambda_proc = do_lambda_form(Link(formals, body), env)
-        env.define(name, lambda_proc)
-        return name
+        lambda_proc = LambdaProcedure(formals, body, env)
+        env.define(func_name, lambda_proc)
+        return func_name
         # END PROBLEM 10
     else:
         bad_signature = signature.first if isinstance(signature, Link) else signature
@@ -102,31 +113,59 @@ def do_if_form(expressions, env):
         return scheme_eval(expressions.rest.rest.first, env)
 
 def do_and_form(expressions, env):
-    """Evaluate a (short-circuited) and form."""
-    # BEGIN PROBLEM 12 - Temporary placeholder
-    if expressions is nil:
+    """Evaluate a (short-circuited) and form.
+
+    >>> env = create_global_frame()
+    >>> do_and_form(read_line("(#f (print 1))"), env) # evaluating (and #f (print 1))
+    False
+    >>> # evaluating (and (print 1) (print 2) (print 4) 3 #f)
+    >>> do_and_form(read_line("((print 1) (print 2) (print 3) (print 4) 3 #f)"), env)
+    1
+    2
+    3
+    4
+    False
+    """
+    # BEGIN PROBLEM 12
+    "*** YOUR CODE HERE ***"
+    if expressions is Link.empty:
         return True
-    current = expressions
-    while current.rest is not nil:
-        result = scheme_eval(current.first, env)
+
+    result = True
+    while expressions is not Link.empty:
+        result = scheme_eval(expressions.first, env)
         if is_scheme_false(result):
-            return False
-        current = current.rest
-    return scheme_eval(current.first, env)
+            return result
+        expressions = expressions.rest
+    return result
     # END PROBLEM 12
 
 def do_or_form(expressions, env):
-    """Evaluate a (short-circuited) or form."""
-    # BEGIN PROBLEM 12 - Temporary placeholder  
-    if expressions is nil:
+    """Evaluate a (short-circuited) or form.
+
+    >>> env = create_global_frame()
+    >>> do_or_form(read_line("(10 (print 1))"), env) # evaluating (or 10 (print 1))
+    10
+    >>> do_or_form(read_line("(#f 2 3 #t #f)"), env) # evaluating (or #f 2 3 #t #f)
+    2
+    >>> # evaluating (or (begin (print 1) #f) (begin (print 2) #f) 6 (begin (print 3) 7))
+    >>> do_or_form(read_line("((begin (print 1) #f) (begin (print 2) #f) 6 (begin (print 3) 7))"), env)
+    1
+    2
+    6
+    """
+    # BEGIN PROBLEM 12
+    "*** YOUR CODE HERE ***"
+    if expressions is Link.empty:
         return False
-    current = expressions
-    while current.rest is not nil:
-        result = scheme_eval(current.first, env)
+
+    while expressions is not Link.empty:
+        result = scheme_eval(expressions.first, env)
         if is_scheme_true(result):
             return result
-        current = current.rest
-    return scheme_eval(current.first, env)
+        expressions = expressions.rest
+
+    return result
     # END PROBLEM 12
 
 def do_cond_form(expressions, env):
@@ -147,6 +186,12 @@ def do_cond_form(expressions, env):
         if is_scheme_true(test):
             # BEGIN OPTIONAL PROBLEM 1
             "*** YOUR CODE HERE ***"
+            result = None
+            body = clause.rest
+            while body is not nil:
+                result = scheme_eval(body.first, env)
+                body = body.rest
+            return result
             # END OPTIONAL PROBLEM 1
         expressions = expressions.rest
 
@@ -171,6 +216,17 @@ def make_let_frame(bindings, env):
     names = vals = nil
     # BEGIN OPTIONAL PROBLEM 2
     "*** YOUR CODE HERE ***"
+    names = nil
+    vals = nil
+    current = bindings
+    while current is not nil:
+        binding = current.first
+        validate_form(binding, 2, 2)
+        names = Link(binding.first, names)
+        vals = Link(scheme_eval(binding.rest.first, env), vals)
+        current = current.rest
+    names = reverse_link(names)
+    vals = reverse_link(vals)
     # END OPTIONAL PROBLEM 2
     return env.make_child_frame(names, vals)
 
