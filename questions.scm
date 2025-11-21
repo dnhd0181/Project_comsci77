@@ -8,7 +8,12 @@
 ;; Returns a list of two-element lists
 (define (enumerate s)
   ; BEGIN PROBLEM 13
-  'replace-this-line
+  (define (enum-helper s i)
+    (if (null? s)
+      '()
+      (cons (list i (car s))
+            (enum-helper (cdr s) (+ i 1)))))
+  (enum-helper s 0)
   ; END PROBLEM 13
   )
 
@@ -18,14 +23,22 @@
 ;; Return the value for a key in a dictionary list
 (define (get dict key)
   ; BEGIN PROBLEM 14
-  'replace-this-line
+  (cond
+    ((null? dict) #f)
+    ((equal? (caar dict) key) (cadar dict))
+    (else (get (cdr dict) key)))
   ; END PROBLEM 14
   )
 
 ;; Return a dictionary list with a (key value) pair
 (define (set dict key val)
   ; BEGIN PROBLEM 14
-  'replace-this-line
+  (cond
+    ((null? dict) (list (list key val)))
+    ((equal? (caar dict) key)
+     (cons (list key val) (cdr dict)))
+    (else
+     (cons (car dict) (set (cdr dict) key val))))
   ; END PROBLEM 14
   )
 
@@ -34,6 +47,6 @@
 ;; implement solution-code
 (define (solution-code problem solution)
   ; BEGIN PROBLEM 15
-  'replace-this-line
+  solution
   ; END PROBLEM 15
   )
