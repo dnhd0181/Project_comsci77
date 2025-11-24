@@ -46,7 +46,22 @@
 
 ;; implement solution-code
 (define (solution-code problem solution)
-  ; BEGIN PROBLEM 15
-  solution
-  ; END PROBLEM 15
-  )
+    ; BEGIN PROBLEM 15
+    (define (replace-blank expr)
+        (cond ((null? expr) '())
+              ((equal? expr '_____) solution)
+              ((pair? expr) 
+               (cons (replace-blank (car expr))
+                     (replace-blank (cdr expr))))
+              (else expr)))
+    (replace-blank problem)
+    ; END PROBLEM 15
+)
+;; Problem 16  
+(define (merge ordered? lst1 lst2)
+  (cond ((null? lst1) lst2)
+        ((null? lst2) lst1)
+        ((ordered? (car lst1) (car lst2))
+         (cons (car lst1) (merge ordered? (cdr lst1) lst2)))
+        (else
+         (cons (car lst2) (merge ordered? lst1 (cdr lst2))))))
